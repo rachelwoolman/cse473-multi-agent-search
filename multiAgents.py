@@ -67,9 +67,13 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
+        # Next game state of a certain action
         successorGameState = currentGameState.generatePacmanSuccessor(action)
+        # New position
         newPos = successorGameState.getPacmanPosition()
+        # New boolean list of where food is
         newFood = successorGameState.getFood()
+        # List of all ghosts
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
