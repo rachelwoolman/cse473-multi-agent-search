@@ -226,7 +226,48 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+         # pacman's legal moves
+        legalMoves = gameState.getLegalActions(0)
+        # initalize best move to the first arbitrarily
+        bestAction = legalMoves[0]
+        # start at negative infinity so any real score would beat
+        bestScore = float('-inf')
+
+        # call minimax on all possible moves and return the highest score
+        for move in legalMoves:
+            score = self.alphaBeta(gameState.generateSuccessor(0, move), 1, 0, float('-inf'), float('inf'))
+            if score > bestScore:
+                bestScore = score
+                bestAction = move
+        return bestAction
+    
+    def alphaBeta(self, gameState, agentIndex, currDepth, alpha, beta):
+        if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+            return self.evaluationFunction(gameState)
+        
+        legalMoves = gameState.getLegalActions(agentIndex)
+        nextAgent = (agentIndex + 1) % gameState.getNumAgents()
+            # if next agent is pacman, increase depth
+        if nextAgent == 0: 
+            nextDepth = currDepth + 1
+        else:
+            nextDepth = currDepth
+
+        # if pacman agent, return the max of the minimax recursion
+        if agentIndex == 0: 
+            # get all legal actions
+            scoresOfMoves = []
+            for move in legalMoves:
+                scoresOfMoves.append(self.minimax(gameState.generateSuccessor(agentIndex, move), nextAgent, nextDepth))
+            return max(scoresOfMoves)
+        # return min if its a ghost
+        else:
+            scoresOfMoves = []
+            for move in legalMoves:
+                scoresOfMoves.append(self.minimax(gameState.generateSuccessor(agentIndex, move), nextAgent, nextDepth))
+            return min(scoresOfMoves)
+
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
