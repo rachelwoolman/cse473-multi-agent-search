@@ -78,9 +78,37 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
+        # use original score to get a baseling
+        score = successorGameState.getScore()
+        #pseudo code attempt
 
-        "***You can change what this function returns***"
-        return successorGameState.getScore()
+        #convert food grid to a list
+        foodList = newFood.asList();
+
+        # increase score if food is close, use reciprocal
+
+        # iterate thru food list
+        # find minimum distance
+        # use reciprocal to increase
+        if foodList:
+            foodDistances = []
+            for foodPos in foodList:
+                foodDistances .append(manhattanDistance(newPos, foodPos))
+            minFoodDistance = min(foodDistances)
+            score += 1.0 / minFoodDistance
+
+
+        # descrease score if ghost is close and not scared
+        for ghost in newGhostStates:
+            # if ghost is not scared see how far
+            if ghost.scaredTimer == 0:
+                ghostPos = ghost.getPosition()
+                distanceToPacman = manhattanDistance(newPos, ghostPos)
+                if distanceToPacman < 2 :
+                    # dangerous, decrease score significantly
+                    score = score - 100
+
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
