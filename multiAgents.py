@@ -225,7 +225,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
          # pacman's legal moves
         legalMoves = gameState.getLegalActions(0)
         # initalize best move to the first arbitrarily
@@ -233,12 +232,18 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # start at negative infinity so any real score would beat
         bestScore = float('-inf')
 
-        # call minimax on all possible moves and return the highest score
+        # initialize alpha and beta
+        alpha = float('-inf')
+        beta = float('inf')
+        # call alphabeta on all possible moves and return the highest score
         for move in legalMoves:
-            score = self.alphaBeta(gameState.generateSuccessor(0, move), 1, 0, float('-inf'), float('inf'))
+            score = self.alphaBeta(gameState.generateSuccessor(0, move), 1, 0, alpha, beta)
             if score > bestScore:
                 bestScore = score
                 bestAction = move
+
+            if score > alpha:
+                alpha = score
         return bestAction
     
     def alphaBeta(self, gameState, agentIndex, currDepth, alpha, beta):
@@ -247,7 +252,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         
         legalMoves = gameState.getLegalActions(agentIndex)
         nextAgent = (agentIndex + 1) % gameState.getNumAgents()
-            # if next agent is pacman, increase depth
+        # if next agent is pacman, increase depth
         if nextAgent == 0: 
             nextDepth = currDepth + 1
         else:
@@ -257,15 +262,33 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         if agentIndex == 0: 
             # get all legal actions
             scoresOfMoves = []
+            #initialize value to negative infinity
+            value = float('-inf')
             for move in legalMoves:
-                scoresOfMoves.append(self.minimax(gameState.generateSuccessor(agentIndex, move), nextAgent, nextDepth))
-            return max(scoresOfMoves)
+                score = self.alphaBeta(gameState.generateSuccessor(agentIndex, move), nextAgent, 
+                                       nextDepth, alpha, beta)
+                if score > value:
+                    value = score
+                # check if we can prune
+                if value > beta:
+                    return value
+                alpha = max(alpha, value)
+            return value
         # return min if its a ghost
         else:
             scoresOfMoves = []
+            #initialize value to positive infinity
+            value = float('inf')
             for move in legalMoves:
-                scoresOfMoves.append(self.minimax(gameState.generateSuccessor(agentIndex, move), nextAgent, nextDepth))
-            return min(scoresOfMoves)
+                score = self.alphaBeta(gameState.generateSuccessor(agentIndex, move), nextAgent,
+                                        nextDepth, alpha, beta)
+                if score < value:
+                    value = score
+                # check if we can prune
+                if value < alpha:
+                    return value
+                beta = min(beta, value)
+            return value
 
 
 
