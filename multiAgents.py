@@ -241,7 +241,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             if score > bestScore:
                 bestScore = score
                 bestAction = move
-
+            # update alpha is the score is better than the current alpha
             if score > alpha:
                 alpha = score
         return bestAction
@@ -291,7 +291,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             return value
 
 
-
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
@@ -304,8 +303,53 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         All ghosts should be modeled as choosing uniformly at random from their
         legal moves.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # pacman's legal moves
+        legalMoves = gameState.getLegalActions(0)
+        # initalize best move to the first arbitrarily
+        bestAction = legalMoves[0]
+        # start at negative infinity so any real score would beat
+        bestScore = float('-inf')
+
+        # call minimax on all possible moves and return the highest score
+        for move in legalMoves:
+            score = self.expectimax(gameState.generateSuccessor(0, move), 1, 0)
+            if score > bestScore:
+                bestScore = score
+                bestAction = move
+
+        return bestAction
+        
+    def expectimax(self, gameState,agentIndex, currDepth):
+        if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+            return self.evaluationFunction(gameState)
+        
+        legalMoves = gameState.getLegalActions(agentIndex)
+        nextAgent = (agentIndex + 1) % gameState.getNumAgents()
+            # if next agent is pacman, increase depth
+        if nextAgent == 0: 
+            nextDepth = currDepth + 1
+        else:
+            nextDepth = currDepth
+
+        # if pacman agent, return the max of the expectimax recursion
+        if agentIndex == 0: 
+            # get all legal actions
+            
+            scoresOfMoves = []
+            for move in legalMoves:
+                scoresOfMoves.append(self.expectimax(gameState.generateSuccessor(agentIndex, move), nextAgent, nextDepth))
+            return max(scoresOfMoves)
+        # return average of move scores considering probability if its a ghost
+        else:
+            scoresOfMoves = []
+            for move in legalMoves:
+                scoresOfMoves.append(self.expectimax(gameState.generateSuccessor(agentIndex, move), nextAgent, nextDepth))
+            # add up scores
+            totalScore = sum(scoresOfMoves)
+            valAfterProbability = totalScore / len(legalMoves)
+            return valAfterProbability
+
+
 
 def betterEvaluationFunction(currentGameState):
     """
