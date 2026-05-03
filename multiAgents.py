@@ -210,11 +210,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 scoresOfMoves.append(self.minimax(gameState.generateSuccessor(agentIndex, move), nextAgent, nextDepth))
             return min(scoresOfMoves)
 
-
-        
-
-
-        
+ 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -350,16 +346,76 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return valAfterProbability
 
 
-
 def betterEvaluationFunction(currentGameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: Used the current score from the game state. If state was a losing state, significantly 
+    penalized. If state was a winning state, greatly increased the state's score. Increased state
+    score when distance to the nearest food was smaller. Subtracted more from the score if there 
+    was more food. Decreased score significantly if ghost was cose and not scared. Increased state
+    score when ghost was scared and closer, which leads pacman to chase the ghosts more. Returned
+    total state score.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # get pacman's current position
+    # get current score
+    # if scary ghost is nearby PENALTY -- subtract
+    # if ghosts are scared add to score
+    # add based on distance reciprocal to nearest food
+    # return new "scorea fter adding or subtracting"
+    # number of capsules
+    
+    currScore = currentGameState.getScore()
+    
+    #start total as the current score
+    totalScore = currScore
+
+    # end score calculating if in a losing state
+    if currentGameState.isLose():
+        totalScore -= 10000
+        return totalScore
+    if currentGameState.isWin():
+        totalScore += 100000
+        return totalScore
+    # pacman's current position
+    currPos = currentGameState.getPacmanPosition()
+    
+    # list of all food locations
+    foodPositions = currentGameState.getFood().asList()
+
+    foodDistances = []
+    for foodPos in foodPositions:
+            foodDistances .append(manhattanDistance(currPos, foodPos))
+            minFoodDistance = min(foodDistances)
+    
+    totalScore += 1.0 / minFoodDistance
+
+    # subtract more from score if there is more food
+    totalScore -= len(foodPositions)
+
+    newGhostStates = currentGameState.getGhostStates()
+    
+    # descrease score if ghost is close and not scared
+    for ghost in newGhostStates:
+        # if ghost is not scared see how far
+        if ghost.scaredTimer > 0:
+            ghostPos = ghost.getPosition()
+            distanceToGhost = manhattanDistance(currPos, ghostPos)
+            # higher score when closer to a ghost to capture them
+            totalScore += 100.0 / distanceToGhost
+        # ghost is dangerous
+        else:
+            ghostPos = ghost.getPosition()
+            distanceToGhost = manhattanDistance(currPos, ghostPos)
+            # closer ghosts encur larger penalty
+            totalScore -= 100.0 / distanceToGhost
+
+
+    return totalScore
+
+    
 
 # Abbreviation
 better = betterEvaluationFunction
